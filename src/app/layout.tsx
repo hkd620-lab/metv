@@ -1,10 +1,19 @@
-import type {Metadata} from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'LexiList - Your Vocabulary Companion',
-  description: 'Manage and learn your English vocabulary with AI-powered suggestions.',
+  title: 'Lexi-Travel',
+  description: '시니어를 위한 여행 영어 단어장 및 문장 조립 퀴즈',
+  manifest: '/manifest.json',
+};
+
+export const viewport: Viewport = {
+  themeColor: '#2563eb',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({

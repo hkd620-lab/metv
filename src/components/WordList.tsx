@@ -1,75 +1,49 @@
 "use client";
 
 import React from 'react';
-import { WordEntry } from '@/lib/types';
+import { TravelWord } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Trash2, BookOpen, ChevronRight } from 'lucide-react';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { TTSButton } from './TTSButton';
+import { InteractiveSentence } from './InteractiveSentence';
 
 interface WordListProps {
-  words: WordEntry[];
-  onDelete: (id: string) => void;
+  words: TravelWord[];
 }
 
-export function WordList({ words, onDelete }: WordListProps) {
-  if (words.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 text-muted-foreground space-y-4 bg-white/50 rounded-xl border-2 border-dashed">
-        <BookOpen className="w-12 h-12 opacity-20" />
-        <p className="text-lg">Your vocabulary list is empty.</p>
-        <p className="text-sm">Start by adding your first word above!</p>
-      </div>
-    );
-  }
-
+export function WordList({ words }: WordListProps) {
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between px-2">
-        <h3 className="font-semibold text-lg text-primary flex items-center gap-2">
-          Your Collection
-          <span className="bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full">
-            {words.length} words
-          </span>
-        </h3>
-      </div>
-      
-      <ScrollArea className="h-[calc(100vh-450px)] min-h-[400px] pr-4">
-        <div className="space-y-3 pb-8">
-          {words.map((word) => (
-            <Card key={word.id} className="group hover:shadow-md transition-all duration-200 border-l-4 border-l-secondary overflow-hidden animate-in fade-in slide-in-from-bottom-2">
-              <CardContent className="p-4 flex items-start justify-between">
-                <div className="space-y-1 flex-1">
-                  <div className="flex items-center gap-2">
-                    <h4 className="text-xl font-bold text-foreground">{word.english}</h4>
-                    <ChevronRight className="w-4 h-4 text-muted-foreground opacity-50" />
-                    <span className="text-primary font-medium">{word.korean}</span>
+    <div className="space-y-6 pb-24">
+      {words.map((word, idx) => (
+        <Card key={word.id} className="border-t-4 border-t-blue-500 shadow-xl rounded-2xl overflow-hidden">
+          <CardContent className="p-5 sm:p-6 space-y-4 bg-white">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div>
+                <span className="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full mb-3 inline-block">필수 단어 {idx + 1}</span>
+                <h3 className="text-4xl font-black text-slate-800 tracking-tight">{word.english}</h3>
+                <p className="text-2xl font-bold text-slate-500 mt-2">{word.korean}</p>
+              </div>
+              <TTSButton englishText={word.english} className="w-16 h-16 bg-blue-100 text-blue-700 hover:bg-blue-200" iconSize="w-8 h-8" />
+            </div>
+            
+            <div className="space-y-3 pt-2">
+              <h4 className="font-semibold text-slate-400 text-sm uppercase tracking-wider mb-2">실생활 예문 (단어를 클릭해보세요!)</h4>
+              {word.examples.map((ex, i) => (
+                <div key={i} className="bg-slate-50 rounded-2xl p-5 flex gap-4 items-center justify-between border border-slate-100 hover:border-blue-200 transition-colors">
+                  <div className="space-y-3 flex-1">
+                    <InteractiveSentence sentence={ex.english} />
+                    <p className="text-lg text-slate-500 font-medium">{ex.korean}</p>
                   </div>
-                  
-                  {word.examples.length > 0 && (
-                    <div className="mt-2 space-y-1">
-                      {word.examples.map((ex, idx) => (
-                        <p key={idx} className="text-sm text-muted-foreground leading-relaxed">
-                          • {ex}
-                        </p>
-                      ))}
-                    </div>
-                  )}
+                  <TTSButton 
+                    englishText={ex.english} 
+                    iconSize="w-5 h-5" 
+                    className="w-12 h-12 shrink-0 bg-white border border-slate-200" 
+                  />
                 </div>
-                
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onDelete(word.id)}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </ScrollArea>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 }

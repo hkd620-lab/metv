@@ -24,8 +24,8 @@ export function WordEntryForm({ onAddWord }: WordEntryFormProps) {
   const handleSuggest = async () => {
     if (!english.trim()) {
       toast({
-        title: "Missing Word",
-        description: "Please enter an English word first.",
+        title: "단어 누락",
+        description: "먼저 영단어를 입력해주세요.",
         variant: "destructive",
       });
       return;
@@ -38,8 +38,8 @@ export function WordEntryForm({ onAddWord }: WordEntryFormProps) {
       setExamples(suggestion.exampleSentences);
     } catch (error) {
       toast({
-        title: "AI Suggestion Failed",
-        description: "Couldn't get a suggestion. Please try again or enter manually.",
+        title: "AI 추천 실패",
+        description: "뜻을 추천받지 못했습니다. 다시 시도하거나 직접 입력해주세요.",
         variant: "destructive",
       });
     } finally {
@@ -51,8 +51,8 @@ export function WordEntryForm({ onAddWord }: WordEntryFormProps) {
     e.preventDefault();
     if (!english.trim() || !korean.trim()) {
       toast({
-        title: "Missing Fields",
-        description: "Both English word and Korean definition are required.",
+        title: "필수 항목 누락",
+        description: "영단어와 한글 뜻을 모두 입력해야 합니다.",
         variant: "destructive",
       });
       return;
@@ -75,17 +75,17 @@ export function WordEntryForm({ onAddWord }: WordEntryFormProps) {
       <CardHeader>
         <CardTitle className="text-xl flex items-center gap-2 text-primary">
           <Plus className="w-5 h-5" />
-          Add New Word
+          새 단어 추가
         </CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="english">English Word</Label>
+            <Label htmlFor="english">영단어</Label>
             <div className="flex gap-2">
               <Input
                 id="english"
-                placeholder="e.g., Serendipity"
+                placeholder="예: Serendipity"
                 value={english}
                 onChange={(e) => setEnglish(e.target.value)}
                 className="flex-1"
@@ -96,7 +96,7 @@ export function WordEntryForm({ onAddWord }: WordEntryFormProps) {
                 size="icon"
                 onClick={handleSuggest}
                 disabled={isSuggesting || !english.trim()}
-                title="Get AI Suggestion"
+                title="AI 추천 받기"
                 className="shrink-0 border-secondary text-secondary hover:bg-secondary hover:text-white"
               >
                 {isSuggesting ? (
@@ -109,7 +109,7 @@ export function WordEntryForm({ onAddWord }: WordEntryFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="korean">Korean Definition</Label>
+            <Label htmlFor="korean">한글 뜻</Label>
             <Input
               id="korean"
               placeholder="뜻을 입력하세요"
@@ -120,7 +120,7 @@ export function WordEntryForm({ onAddWord }: WordEntryFormProps) {
 
           {examples.length > 0 && (
             <div className="space-y-2 pt-2">
-              <Label className="text-muted-foreground text-xs uppercase tracking-wider">Example Sentences</Label>
+              <Label className="text-muted-foreground text-xs uppercase tracking-wider">예문</Label>
               <ul className="space-y-2">
                 {examples.map((ex, idx) => (
                   <li key={idx} className="text-sm p-2 bg-muted/50 rounded-md border border-border italic">
@@ -133,7 +133,7 @@ export function WordEntryForm({ onAddWord }: WordEntryFormProps) {
 
           <div className="flex gap-2 pt-2">
             <Button type="submit" className="flex-1 bg-primary hover:bg-primary/90">
-              Add to LexiList
+              단어장에 추가
             </Button>
             <Button
               type="button"
