@@ -4,8 +4,8 @@ const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || "
 
 export const analyzeEnglishAudio = async (audioBase64: string, mimeType: string) => {
   try {
-    // 유료 티어에서 가장 효율적인 gemini-1.5-flash 모델을 사용합니다.
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // 유료 티어에서 가장 효율적인 gemini-2.5-flash 모델을 사용합니다.
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const prompt = `
       당신은 전문 영어 발음 코치입니다. 이 오디오 파일을 정밀 분석하여 다음을 수행하세요:
