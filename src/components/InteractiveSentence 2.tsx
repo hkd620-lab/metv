@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { getWordMeaning } from '@/lib/dictionary';
-import { playAITTS } from '@/components/TTSButton';
+import { playNativeTTS } from '@/components/TTSButton';
 
 interface InteractiveSentenceProps {
   sentence: string;
@@ -24,7 +24,7 @@ export function InteractiveSentence({ sentence }: InteractiveSentenceProps) {
 
     // 2. 단어 개별 원어민 발음 재생
     if (text) {
-      playAITTS(text);
+      playNativeTTS(text);
     }
   };
 

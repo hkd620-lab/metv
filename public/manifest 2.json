@@ -1,6 +1,6 @@
 {
-  "name": "METV",
-  "short_name": "METV",
+  "name": "Lexi-Travel",
+  "short_name": "Lexi-Travel",
   "description": "시니어를 위한 여행 영어 단어장 및 퀴즈",
   "start_url": "/",
   "display": "standalone",

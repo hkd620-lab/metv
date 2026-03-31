@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { TravelWord, ExampleSentence } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import confetti from 'canvas-confetti';
-import { TTSButton, playAITTS } from './TTSButton';
+import { TTSButton, playNativeTTS } from './TTSButton';
 
 interface ScrambleQuizProps {
   words: TravelWord[];
@@ -99,7 +99,7 @@ export function ScrambleQuiz({ words, onCorrectAnswer }: ScrambleQuizProps) {
         
         // 맥OS/iOS의 고품질 원어민 발음 자동 재생 (Samantha, Daniel 최우선)
         if (currentSentence) {
-          playAITTS(currentSentence.english);
+          playNativeTTS(currentSentence.english);
         }
 
         onCorrectAnswer();

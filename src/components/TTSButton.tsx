@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Volume2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Volume2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface TTSButtonProps {
@@ -10,57 +10,87 @@ interface TTSButtonProps {
   iconSize?: string;
 }
 
-// 고품질 음성을 찾는 공통 헬퍼 함수
-export function playNativeTTS(text: string, onEnd?: () => void, onError?: () => void) {
-  if (typeof window === 'undefined' || !window.speechSynthesis) {
-    if (onError) onError();
-    return;
+// 오디오가 겹치지 않게 하기 위한 전역 변수
+let currentAudio: HTMLAudioElement | null = null;
+const audioCache = new Map<string, string>(); // 텍스트별 오디오 URL 캐싱
+
+export function stopAITTS() {
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+    currentAudio = null;
   }
+}
+
+// 고품질 Google TTS 음성 호출 함수
+export async function playAITTS(text: string, onEnd?: () => void, onError?: () => void) {
+  stopAITTS();
   
-  window.speechSynthesis.cancel(); // 진행 중인 음성 취소
+  try {
+    let url = audioCache.get(text);
 
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = 'en-US';
-  utterance.rate = 1.0; // 완전 원어민 일반 말하기 속도로 설정
-
-  const voices = window.speechSynthesis.getVoices();
-  // 우선순위: 맥OS/iOS 고품질 원어민 음성(Samantha, Daniel) 최우선 선택
-  const preferredVoice = 
-    voices.find(v => v.name.includes("Samantha") && v.lang.startsWith("en")) || 
-    voices.find(v => v.name.includes("Daniel") && v.lang.startsWith("en")) || 
-    voices.find(v => v.name.includes("Google US English")) || 
-    voices.find(v => v.lang === 'en-US') || 
-    voices.find(v => v.lang.startsWith("en"));
+    // 캐시에 없으면 새로 서버에 요청하여 받아옴
+    if (!url) {
+      const res = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+      });
+      
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'TTS Fetch failed');
+      }
+      
+      const blob = await res.blob();
+      url = URL.createObjectURL(blob);
+      audioCache.set(text, url); // 메모리에 오디오 URL 저장 (지연시간 완전 제거)
+    }
     
-  if (preferredVoice) {
-    utterance.voice = preferredVoice;
+    const audio = new Audio(url);
+    currentAudio = audio;
+    
+    if (onEnd) audio.onended = onEnd;
+    
+    // 자동 재생 에러 방지 및 에러 콜백
+    audio.play().catch(e => {
+      console.error('Audio Play Error:', e);
+      if (onError) onError();
+    });
+  } catch (error) {
+    console.error('TTS Request Error:', error);
+    if (onError) onError();
+    throw error;
   }
-
-  if (onEnd) utterance.onend = onEnd;
-  if (onError) utterance.onerror = onError;
-
-  window.speechSynthesis.speak(utterance);
 }
 
 export function TTSButton({ englishText, className = "", iconSize = "w-6 h-6" }: TTSButtonProps) {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // 컴포넌트 마운트 시 브라우저 음성 목록 미리 로드 (비동기 로딩 대응)
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
-      window.speechSynthesis.getVoices();
-    }
-  }, []);
-
-  const handlePlay = () => {
-    if (isPlaying) return;
-    setIsPlaying(true);
+  const handlePlay = async () => {
+    if (isPlaying || isLoading) return;
+    setIsLoading(true);
     
-    playNativeTTS(
-      englishText,
-      () => setIsPlaying(false),
-      () => setIsPlaying(false)
-    );
+    try {
+      await playAITTS(
+        englishText,
+        () => {
+          setIsPlaying(false);
+          setIsLoading(false);
+        },
+        () => {
+          setIsPlaying(false);
+          setIsLoading(false);
+        }
+      );
+      setIsPlaying(true);
+      setIsLoading(false);
+    } catch (e: any) {
+      setIsLoading(false);
+      setIsPlaying(false);
+      alert(e.message || "음성 재생에 실패했습니다. 키 설정을 확인하세요.");
+    }
   };
 
   return (
@@ -68,12 +98,13 @@ export function TTSButton({ englishText, className = "", iconSize = "w-6 h-6" }:
       variant="secondary" 
       size="icon" 
       onClick={handlePlay}
+      disabled={isLoading}
       className={`rounded-full shadow-md hover:scale-105 active:scale-95 transition-all w-12 h-12 
         ${isPlaying ? 'bg-blue-600 text-white animate-pulse' : 'bg-blue-50 text-blue-600'} 
         ${className}`}
       title="영어 발음 듣기"
     >
-      <Volume2 className={iconSize} />
+      {isLoading ? <Loader2 className={`animate-spin ${iconSize}`} /> : <Volume2 className={iconSize} />}
     </Button>
   );
 }

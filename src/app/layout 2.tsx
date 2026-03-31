@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'METV',
+  title: 'Lexi-Travel',
   description: '시니어를 위한 여행 영어 단어장 및 문장 조립 퀴즈',
   manifest: '/manifest.json',
 };

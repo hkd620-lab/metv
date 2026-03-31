@@ -68,7 +68,7 @@ export default function Home() {
             <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-sm">
               <Plane className="w-6 h-6" />
             </div>
-            <h1 className="text-2xl font-black tracking-tight text-blue-600">Lexi-Travel</h1>
+            <h1 className="text-2xl font-black tracking-tight text-blue-600">METV (필여단정)</h1>
           </div>
           {/* 점수 표시기 */}
           <div className="flex items-center gap-2 bg-yellow-50 px-4 py-2 rounded-full border border-yellow-200 shadow-sm">
