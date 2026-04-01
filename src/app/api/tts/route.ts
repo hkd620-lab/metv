@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
   try {
-    const { text } = await req.json();
+    const { text, voiceName = 'en-US-Journey-F', languageCode = 'en-US' } = await req.json();
 
     if (!text) {
       return NextResponse.json({ error: 'Text is required' }, { status: 400 });
@@ -19,8 +19,7 @@ export async function POST(req: Request) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         input: { text },
-        // 가장 고품질이고 자연스러운 모델 (en-US-Journey 시리즈)
-        voice: { languageCode: 'en-US', name: 'en-US-Journey-F' },
+        voice: { languageCode, name: voiceName },
         audioConfig: { audioEncoding: 'MP3' }
       })
     });

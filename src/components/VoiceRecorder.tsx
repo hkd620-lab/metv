@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState, useRef } from 'react';
-import { Mic, Square, Loader2, Sparkles, MessageSquare } from 'lucide-react';
+import { Mic, Square, Loader2, Sparkles, MessageSquare, Volume2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { analyzeEnglishAudio } from '@/lib/gemini';
+import { playMixedTTS, stopMixedAITTS } from '@/lib/ttsUtils';
 import { Card, CardContent } from '@/components/ui/card';
 
 export function VoiceRecorder() {
@@ -11,8 +12,27 @@ export function VoiceRecorder() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [sttText, setSttText] = useState<string | null>(null);
+  const [isReadingFeedback, setIsReadingFeedback] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+
+  const handleReadFeedback = async () => {
+    if (isReadingFeedback) {
+      stopMixedAITTS();
+      setIsReadingFeedback(false);
+      return;
+    }
+    if (!feedback) return;
+    setIsReadingFeedback(true);
+    await playMixedTTS(
+      feedback,
+      () => setIsReadingFeedback(false),
+      (err) => {
+        setIsReadingFeedback(false);
+        alert(err.message);
+      }
+    );
+  };
 
   const toggleRecording = async () => {
     if (isRecording) {
@@ -158,8 +178,19 @@ export function VoiceRecorder() {
       {feedback && (
         <Card className="bg-yellow-50 border-yellow-200 mt-2 shadow-inner animate-in fade-in slide-in-from-top-2">
           <CardContent className="p-4 text-sm whitespace-pre-wrap text-slate-700 leading-relaxed font-medium">
-            <div className="flex items-center gap-1.5 mb-2 text-slate-800 font-bold border-b border-yellow-200 pb-2">
-              <Sparkles className="w-4 h-4 text-yellow-600" /> <span className="text-yellow-800">Gemini 코치의 피드백</span>
+            <div className="flex items-center justify-between gap-1.5 mb-2 border-b border-yellow-200 pb-2">
+              <div className="flex items-center gap-1.5 text-slate-800 font-bold">
+                <Sparkles className="w-4 h-4 text-yellow-600" /> <span className="text-yellow-800">Gemini 코치의 피드백</span>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleReadFeedback}
+                className={`h-7 px-2.5 text-xs font-semibold rounded-full transition-all ${isReadingFeedback ? 'bg-yellow-200 text-yellow-800 animate-pulse' : 'bg-yellow-100/50 text-yellow-700 hover:bg-yellow-200'}`}
+              >
+                {isReadingFeedback ? <Square className="w-3.5 h-3.5 mr-1" /> : <Volume2 className="w-3.5 h-3.5 mr-1" />}
+                {isReadingFeedback ? '중지' : '코치 음성 듣기'}
+              </Button>
             </div>
             {feedback}
           </CardContent>
