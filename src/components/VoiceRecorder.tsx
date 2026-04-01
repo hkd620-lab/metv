@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from 'react';
-import { Mic, Square, Loader2, Sparkles, MessageSquare, Volume2 } from 'lucide-react';
+import { Mic, Square, Loader2, Sparkles, MessageSquare, Volume2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { analyzeEnglishAudio } from '@/lib/gemini';
 import { playMixedTTS, stopMixedAITTS } from '@/lib/ttsUtils';
@@ -33,6 +33,12 @@ export function VoiceRecorder() {
         alert(err.message);
       }
     );
+  };
+
+  const handleCloseFeedback = () => {
+    stopMixedAITTS();
+    setIsReadingFeedback(false);
+    setFeedback(null);
   };
 
   const toggleRecording = async () => {
@@ -203,15 +209,26 @@ export function VoiceRecorder() {
               <div className="flex items-center gap-1.5 text-slate-800 font-bold">
                 <Sparkles className="w-4 h-4 text-yellow-600" /> <span className="text-yellow-800">Gemini 코치의 피드백</span>
               </div>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={handleReadFeedback}
-                className={`h-7 px-2.5 text-xs font-semibold rounded-full transition-all ${isReadingFeedback ? 'bg-yellow-200 text-yellow-800 animate-pulse' : 'bg-yellow-100/50 text-yellow-700 hover:bg-yellow-200'}`}
-              >
-                {isReadingFeedback ? <Square className="w-3.5 h-3.5 mr-1" /> : <Volume2 className="w-3.5 h-3.5 mr-1" />}
-                {isReadingFeedback ? '중지' : '코치 음성 듣기'}
-              </Button>
+              <div className="flex items-center gap-1.5">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={handleReadFeedback}
+                  className={`h-7 px-2.5 text-xs font-semibold rounded-full transition-all ${isReadingFeedback ? 'bg-yellow-200 text-yellow-800 animate-pulse' : 'bg-yellow-100/50 text-yellow-700 hover:bg-yellow-200'}`}
+                >
+                  {isReadingFeedback ? <Square className="w-3.5 h-3.5 mr-1" /> : <Volume2 className="w-3.5 h-3.5 mr-1" />}
+                  {isReadingFeedback ? '중지' : '음성 듣기'}
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={handleCloseFeedback}
+                  className="h-7 w-7 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                  title="피드백 닫기"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
             {feedback}
           </CardContent>
