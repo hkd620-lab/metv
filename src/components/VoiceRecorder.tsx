@@ -13,6 +13,7 @@ export function VoiceRecorder() {
   const [feedback, setFeedback] = useState<string | null>(null);
   const [sttText, setSttText] = useState<string | null>(null);
   const [isReadingFeedback, setIsReadingFeedback] = useState(false);
+  const [audioPayload, setAudioPayload] = useState<{base64: string, mimeType: string} | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
 
@@ -64,7 +65,7 @@ export function VoiceRecorder() {
           return;
         }
         
-        submitAudioForSTTAndAnalysis(audioBlob, 'audio/webm');
+        submitAudioForSTT(audioBlob, 'audio/webm');
         stream.getTracks().forEach((track) => track.stop());
       };
 
@@ -85,18 +86,20 @@ export function VoiceRecorder() {
     }
   };
 
-  const submitAudioForSTTAndAnalysis = async (blob: Blob, mimeType: string) => {
+  const submitAudioForSTT = async (blob: Blob, mimeType: string) => {
     setIsAnalyzing(true);
     setFeedback(null);
     setSttText(null);
+    setAudioPayload(null);
     
     try {
       const reader = new FileReader();
       reader.readAsDataURL(blob);
       reader.onloadend = async () => {
         const base64Data = (reader.result as string).split(',')[1];
+        setAudioPayload({ base64: base64Data, mimeType });
         
-        // 1. Google Cloud STT 우선 호출 (즉각적인 텍스트 변환 -> 화면 표출)
+        // 1. Google Cloud STT 호출 (즉각적인 텍스트 변환 -> 화면 표출)
         try {
           const sttRes = await fetch('/api/stt', {
             method: 'POST',
@@ -118,22 +121,27 @@ export function VoiceRecorder() {
         } catch (e) {
           console.error("STT Fetch Error:", e);
           setSttText("(STT 변환 실패)");
-        }
-        
-        // 2. Gemini API 호출하여 상세 발음 평가 (코칭)
-        try {
-            const resultText = await analyzeEnglishAudio(base64Data, mimeType);
-            setFeedback(resultText);
-        } catch (e: any) {
-            console.error("Gemini 분석 에러", e);
-            setFeedback("코칭 중 오류가 발생했습니다: " + (e.message || "알 수 없는 오류"));
         } finally {
             setIsAnalyzing(false);
         }
       };
     } catch (e: any) {
       setIsAnalyzing(false);
-      setFeedback("오디오 처리 중 오류가 발생했습니다.");
+      setSttText("(오디오 처리 오류)");
+    }
+  };
+
+  const requestGeminiFeedback = async () => {
+    if (!audioPayload) return;
+    setIsAnalyzing(true);
+    try {
+        const resultText = await analyzeEnglishAudio(audioPayload.base64, audioPayload.mimeType);
+        setFeedback(resultText);
+    } catch (e: any) {
+        console.error("Gemini 분석 에러", e);
+        setFeedback("코칭 중 오류가 발생했습니다: " + (e.message || "알 수 없는 오류"));
+    } finally {
+        setIsAnalyzing(false);
     }
   };
 
@@ -166,12 +174,25 @@ export function VoiceRecorder() {
       </div>
 
       {sttText && (
-        <div className="mt-2 text-sm font-medium text-blue-800 bg-blue-50 border border-blue-100 rounded-lg p-4 flex items-start gap-3 shadow-sm animate-in fade-in slide-in-from-top-2">
-          <MessageSquare className="w-6 h-6 text-blue-500 shrink-0 mt-0.5" />
-          <div className="flex flex-col">
-            <span className="text-xs font-bold text-blue-600 mb-1 uppercase tracking-wider">내가 발음한 문장</span>
-            <span className="text-xl font-bold italic tracking-tight text-blue-950">"{sttText}"</span>
+        <div className="mt-2 text-sm font-medium text-blue-800 bg-blue-50 border border-blue-100 rounded-lg p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm animate-in fade-in slide-in-from-top-2">
+          <div className="flex items-start gap-3">
+            <MessageSquare className="w-6 h-6 text-blue-500 shrink-0 mt-0.5" />
+            <div className="flex flex-col">
+              <span className="text-xs font-bold text-blue-600 mb-1 uppercase tracking-wider">내가 발음한 문장</span>
+              <span className="text-xl font-bold italic tracking-tight text-blue-950">"{sttText}"</span>
+            </div>
           </div>
+          {!feedback && !isAnalyzing && audioPayload && (
+             <Button 
+                onClick={requestGeminiFeedback} 
+                variant="default" 
+                size="sm"
+                className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold whitespace-nowrap shadow-md"
+             >
+                <Sparkles className="w-4 h-4 mr-1.5" /> 
+                Gemini 발음 코칭받기
+             </Button>
+          )}
         </div>
       )}
 
