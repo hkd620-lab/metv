@@ -48,7 +48,8 @@ metv/
 │       └── dictionary.ts             # 150+ 단어 사전
 ├── .env.local                        # ⚠️ API 키 보관 (절대 커밋 금지!)
 ├── .gitignore                        # .env.local 반드시 포함 확인
-├── CLAUDE.md                         # 이 파일
+├── .claude/
+│   └── CLAUDE.md                     # 이 파일
 └── package.json
 ```
 
