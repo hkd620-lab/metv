@@ -1,4 +1,4 @@
-# METV 프로젝트 — Claude Code 참고 파일 (claude.md)
+# METV 프로젝트 — Claude Code 참고 파일 (CLAUDE.md)
 
 > ⚠️ **이 파일은 Claude Code(cc)가 반드시 읽고 따라야 하는 프로젝트 규칙서입니다.**
 > 작업 시작 전에 이 파일을 먼저 확인하세요.
@@ -48,7 +48,8 @@ metv/
 │       └── dictionary.ts             # 150+ 단어 사전
 ├── .env.local                        # ⚠️ API 키 보관 (절대 커밋 금지!)
 ├── .gitignore                        # .env.local 반드시 포함 확인
-├── claude.md                         # 이 파일
+├── .claude/
+│   └── CLAUDE.md                     # 이 파일
 └── package.json
 ```
 
@@ -225,7 +226,7 @@ function doSomething(data: any) { ... } // 사용하지 마세요
 | `[리팩토링]` | 코드 정리 (기능 변화 없음) | `[리팩토링] TTSButton 컴포넌트 주석 한국어로 정리` |
 | `[데이터]` | 단어/문장 데이터 수정 | `[데이터] 식당 섹션 예문 10개 추가` |
 | `[환경설정]` | 설정 파일 변경 | `[환경설정] Firebase 배포 설정 업데이트` |
-| `[문서]` | README, claude.md 등 수정 | `[문서] claude.md 트러블슈팅 항목 추가` |
+| `[문서]` | README, CLAUDE.md 등 수정 | `[문서] CLAUDE.md 트러블슈팅 항목 추가` |
 
 ### ✅ 좋은 커밋 메시지 예시
 
